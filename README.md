@@ -1,6 +1,6 @@
-# BLENDED_LEARNING
 # Implementation of Ridge, Lasso, and ElasticNet Regularization for Predicting Car Price
-
+### Developed by: Aaron H
+### RegisterNumber: 212223040001
 ## AIM:
 To implement Ridge, Lasso, and ElasticNet regularization models using polynomial features and pipelines to predict car price.
 
@@ -10,139 +10,81 @@ To implement Ridge, Lasso, and ElasticNet regularization models using polynomial
 
 ## Algorithm
 1. **Import Libraries**:  
-   Import the required libraries.
+   - Use pandas for data handling and scikit-learn for preprocessing, modeling, and evaluation tasks.  
 
-2. **Load Dataset**:  
-   Load the dataset into the environment.
+2. **Dataset Loading**:  
+   - Load the dataset from `encoded_car_data.csv`.  
 
-3. **Data Preprocessing**:  
-   Handle missing values and encode categorical variables.
+3. **Feature and Target Selection**:  
+   - Separate the dataset into features (X) and target variable (y).  
 
-4. **Define Features and Target**:  
-   Split the dataset into features (X) and the target variable (y).
+4. **Data Splitting**:  
+   - Split the dataset into training and testing sets with an 80-20 ratio.  
 
-5. **Create Polynomial Features**:  
-   Generate polynomial features from the data.
+5. **Model and Pipeline Definition**:  
+   - Construct pipelines for Ridge, Lasso, and ElasticNet regression models, incorporating polynomial feature transformation with a degree of 2.  
 
-6. **Set Up Pipelines**:  
-   Create pipelines for Ridge, Lasso, and ElasticNet models.
+6. **Model Training**:  
+   - Train each regression model pipeline using the training data.  
 
-7. **Train Models**:  
-   Fit each model to the training data.
+7. **Prediction Generation**:  
+   - Use the trained models to predict car prices on the test set.  
 
-8. **Evaluate Model Performance**:  
-   Assess performance using the R² score and Mean Squared Error (MSE).
-
-9. **Compare Results**:  
-   Compare the performance of the models.
+8. **Model Evaluation**:  
+   - Evaluate each model’s performance by calculating metrics such as Mean Squared Error (MSE) and R² score.  
 
 ## Program:
 ```
-/*
-Program to implement Ridge, Lasso, and ElasticNet regularization using pipelines.
-Developed by: Aaron H
-RegisterNumber: 212223040001
+# Program to implement Ridge, Lasso, and ElasticNet regularization using pipelines.
 # Importing necessary libraries
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import Ridge, Lasso, ElasticNet
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.pipeline import Pipeline
+from sklearn.linear_model import Ridge, Lasso, ElasticNet
 from sklearn.metrics import mean_squared_error, r2_score
 
 # Load the dataset
-data = pd.read_csv("https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-ML240EN-SkillsNetwork/labs/data/CarPrice_Assignment.csv")
+file_path = 'https://cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud/IBM-ML240EN-SkillsNetwork/labs/encoded_car_data.csv'
+df = pd.read_csv(file_path)
 
-# Data preprocessing
-data = data.drop(['CarName', 'car_ID'], axis=1)
-data = pd.get_dummies(data, drop_first=True)
+# Select relevant features and target variable
+X = df.drop(columns=['price'])  # All columns except 'price'
+y = df['price']  # Target variable
 
-# Splitting the data into features and target variable
-X = data.drop('price', axis=1)
-y = data['price']
-
-# Splitting the dataset into training and testing sets
+# Split the dataset into training and testing sets
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Define the models and pipelines
 models = {
     "Ridge": Ridge(alpha=1.0),
-    "Lasso": Lasso(alpha=1.0),
-    "ElasticNet": ElasticNet(alpha=1.0, l1_ratio=0.5)
+    "Lasso": Lasso(alpha=0.01),
+    "ElasticNet": ElasticNet(alpha=0.01, l1_ratio=0.5)  # l1_ratio controls L1 vs L2 mix
 }
 
-# Dictionary to store results
-results = {}
-
-# Train and evaluate each model
+# Iterate over models and evaluate
 for name, model in models.items():
-    # Create a pipeline with polynomial features and the model
     pipeline = Pipeline([
-        ('poly', PolynomialFeatures(degree=2)),
-        ('regressor', model)
+        ("polynomial_features", PolynomialFeatures(degree=2)),
+        ("regressor", model)
     ])
     
-    # Fit the model
+    # Train the model
     pipeline.fit(X_train, y_train)
     
     # Make predictions
-    predictions = pipeline.predict(X_test)
+    y_pred = pipeline.predict(X_test)
     
-    # Calculate performance metrics
-    mse = mean_squared_error(y_test, predictions)
-    r2 = r2_score(y_test, predictions)
-    
-    # Store results
-    results[name] = {'MSE': mse, 'R² Score': r2}
+    # Evaluate the model
+    print(f"\n{name} Regression Results:")
+    print("Mean Squared Error (MSE):", mean_squared_error(y_test, y_pred))
+    print("R-squared:", r2_score(y_test, y_pred))
 
-# Print results
-for model_name, metrics in results.items():
-    print(f"{model_name} - Mean Squared Error: {metrics['MSE']:.2f}, R² Score: {metrics['R² Score']:.2f}")
-
-# Visualization of the results
-# Convert results to DataFrame for easier plotting
-results_df = pd.DataFrame(results).T
-results_df.reset_index(inplace=True)
-results_df.rename(columns={'index': 'Model'}, inplace=True)
-
-# Set the figure size
-plt.figure(figsize=(12, 5))
-
-# Bar plot for MSE
-plt.subplot(1, 2, 1)
-sns.barplot(x='Model', y='MSE', data=results_df, palette='viridis')
-plt.title('Mean Squared Error (MSE)')
-plt.ylabel('MSE')
-plt.xticks(rotation=45)
-
-# Bar plot for R² Score
-plt.subplot(1, 2, 2)
-sns.barplot(x='Model', y='R² Score', data=results_df, palette='viridis')
-plt.title('R² Score')
-plt.ylabel('R² Score')
-plt.xticks(rotation=45)
-
-# Show the plots
-plt.tight_layout()
-plt.show()
-
-*/
 ```
 
 ## Output:
+<img width="646" alt="Screenshot 2024-11-17 at 7 57 52 PM" src="https://github.com/user-attachments/assets/28879792-1426-453d-a9d2-1fbeab305a4d">
 
-model = cd_fast.enet_coordinate_descent(
-
-Ridge - Mean Squared Error: 39011712.54, R² Score: 0.51
-
-Lasso - Mean Squared Error: 12616438.15, R² Score: 0.84
-
-ElasticNet - Mean Squared Error: 8666607.74, R² Score: 0.89)
-
-<img width="1197" alt="Screenshot 2024-10-06 at 8 58 51 PM" src="https://github.com/user-attachments/assets/bfeebd0c-c84d-4dce-9c38-182990f46973">
 
 
 ## Result:
